@@ -16,4 +16,10 @@ export class AuthController {
   async isAuthorized() {
     return true;
   }
+
+  @UseGuards(AuthGuard)
+  @Get('/is-authorized-2')
+  async isAuthorized2() {
+    return true;
+  }
 }
