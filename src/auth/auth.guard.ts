@@ -4,7 +4,7 @@ import { Request } from 'express'
 import { Observable } from 'rxjs'
 
 interface RequestExtended extends Request {
-  cookies: { jwtToken?: string }
+  cookies: { authToken?: string }
 }
 
 @Injectable()
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<RequestExtended>()
 
-    if (!request.cookies?.jwtToken) {
+    if (!request.cookies?.authToken) {
       throw new BadRequestException('Not authorize user.')
     }
 

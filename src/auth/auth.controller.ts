@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from './auth.guard'
 import { AuthService } from './auth.service'
 import { IsNumberString, IsString } from 'class-validator'
+import { Response } from 'express'
 
 class IsUserExistsParams {
   @IsNumberString()
@@ -21,8 +22,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post()
-  async Authorize(@Body() body: AuthParams) {
-    return this.authService.authorizeUser(body.login, body.password)
+  async Authorize(@Body() body: AuthParams, @Res({ passthrough: true }) response: Response) {
+    const token = await this.authService.generateNewUserToken(body.login, body.password)
+
+    if (!token) {
+      // server error
+    }
+    response.cookie('authToken', token)
   }
 
   @UseGuards(AuthGuard)
@@ -31,6 +37,7 @@ export class AuthController {
     return true
   }
 
+  @UseGuards(AuthGuard)
   @Get('/is-user-exist/:userId')
   async isUserExist(@Param() params: IsUserExistsParams) {
     return this.authService.isUserExist(params.userId)

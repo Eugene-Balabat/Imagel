@@ -12,6 +12,8 @@
 
 - Прочитать о class-transformer и class-validator, сделат проверку что userId в апишке is-user-exist является числом через декоратор
 
+! DONE
+
 - Реализовать логин пользователя и завести JWT в проект используя @nestjs/passport или @nestjs/jwt
   **<https://docs.nestjs.com/security/authentication>**
 - Создать модуль изображений и реализовать все существующие роуты
