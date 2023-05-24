@@ -2,6 +2,7 @@ import { BadRequestException, CanActivate, ExecutionContext, Injectable } from '
 import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
 import { Observable } from 'rxjs'
+import { DataSource } from 'typeorm'
 
 interface RequestExtended extends Request {
   cookies: { authToken?: string }
@@ -9,7 +10,7 @@ interface RequestExtended extends Request {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector, private readonly dataSource: DataSource) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<RequestExtended>()

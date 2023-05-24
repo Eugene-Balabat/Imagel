@@ -15,6 +15,6 @@ export class ImageService {
   }
 
   async getAllUserImages(userId: string) {
-    return this.dataSource.getRepository(ImageEntity).findBy({ userId: Number(userId) })
+    return this.dataSource.getRepository(ImageEntity).find({ where: { userId: Number(userId) } })
   }
 }

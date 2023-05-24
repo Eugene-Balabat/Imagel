@@ -3,9 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import * as path from 'path'
 import { AuthModule } from './auth/auth.module'
+import { ImageModule } from './image/image.module'
 import { ImageEntity } from './models/image.model'
 import { UserEntity } from './models/user.model'
-import { ImageModule } from './image/image.module'
 
 @Module({
   imports: [

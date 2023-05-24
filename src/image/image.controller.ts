@@ -1,14 +1,9 @@
-import { Controller, Param, Post, UploadedFile, UseGuards, UseInterceptors, Get } from '@nestjs/common'
-import { ImageService } from './image.service'
-import { AuthGuard } from 'src/auth/auth.guard'
+import { Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
-import { IsNumberString } from 'class-validator'
-
-class UserRequestParams {
-  @IsNumberString()
-  userId: string
-}
+import { AuthGuard } from 'src/auth/auth.guard'
+import { ImageService } from './image.service'
+import { UserRequestParams } from './requests/user.param'
 
 @Controller('/image')
 export class ImageController {
@@ -17,11 +12,11 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Get('/:userId')
   async getUserImages(@Param() params: UserRequestParams) {
-    return await this.imageService.getAllUserImages(params.userId)
+    return this.imageService.getAllUserImages(params.userId)
   }
 
   @UseGuards(AuthGuard)
-  @Post('/save/:userId')
+  @Post('/save')
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
