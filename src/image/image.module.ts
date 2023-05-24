@@ -4,7 +4,7 @@ import { ImageController } from './image.controller'
 import { MulterModule } from '@nestjs/platform-express'
 
 @Module({
-  imports: [MulterModule.register({ dest: './upload', preservePath: false })],
+  imports: [MulterModule],
   controllers: [ImageController],
   providers: [ImageService],
 })

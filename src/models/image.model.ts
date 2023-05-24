@@ -12,7 +12,7 @@ export class ImageEntity extends BaseEntity {
   title!: string
 
   @Column({ primary: false, type: 'timestamp', name: 'date', default: () => 'NOW()' })
-  date!: Date
+  date: Date
 
   @Column({ primary: false, type: 'int8', name: 'user_id' })
   userId!: number

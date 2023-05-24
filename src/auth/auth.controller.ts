@@ -22,13 +22,18 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post()
-  async Authorize(@Body() body: AuthParams, @Res({ passthrough: true }) response: Response) {
+  async authorize(@Body() body: AuthParams, @Res({ passthrough: true }) response: Response) {
     const token = await this.authService.generateNewUserToken(body.login, body.password)
 
     if (!token) {
       // server error
     }
     response.cookie('authToken', token)
+  }
+
+  @Post()
+  async unAuthorize(@Res({ passthrough: true }) response: Response) {
+    // response.cookie('authToken', token)
   }
 
   @UseGuards(AuthGuard)
