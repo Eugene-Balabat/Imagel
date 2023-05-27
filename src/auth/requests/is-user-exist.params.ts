@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer'
-import { IsNumberString } from 'class-validator'
+import { IsNumber } from 'class-validator'
 
 export class IsUserExistsParams {
-  @IsNumberString()
+  @IsNumber()
   @Type(() => Number)
   userId: number
 }

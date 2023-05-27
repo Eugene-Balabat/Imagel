@@ -1,19 +1,20 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm'
 
-export class AddDateColumnInImageTable1684511588384 implements MigrationInterface {
+export class AddNicknameColumnToUserTable1685225183583 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
-      'images',
+      'users',
       new TableColumn({
-        name: 'date',
+        name: 'nickname',
         isNullable: false,
-        type: 'timestamp',
-        default: 'NOW()',
+        type: 'varchar',
+        length: '50',
+        default: "'No Nickname'",
       }),
     )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('images', 'date')
+    await queryRunner.dropColumn('users', 'nickname')
   }
 }
