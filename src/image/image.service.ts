@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { PaginationParams } from 'src/auth/requests/pagination.params'
 import { ImageEntity } from 'src/models/image.model'
 import { DataSource } from 'typeorm'
 
@@ -18,10 +19,7 @@ export class ImageService {
     return this.dataSource.getRepository(ImageEntity).find({ where: { userId } })
   }
 
-  async getAllImages() {
-    const images = await this.dataSource.getRepository(ImageEntity).find()
-
-    console.log(images)
-    return true
+  async getAllImages(params: PaginationParams) {
+    return this.dataSource.getRepository(ImageEntity).find({ skip: (params.page - 1) * params.limit, take: params.limit, relations: { user: true } })
   }
 }
