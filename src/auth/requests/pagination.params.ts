@@ -11,6 +11,6 @@ export class PaginationParams {
   page: number
 
   constructor(limit?: number) {
-    this.limit = limit | 2
+    this.limit = limit || 2
   }
 }
