@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm'
 
 export class DeletePrimaryPropertyInColumns1684075099676 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -29,7 +29,7 @@ export class DeletePrimaryPropertyInColumns1684075099676 implements MigrationInt
           length: '50',
         }),
       },
-    ]);
+    ])
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -60,6 +60,6 @@ export class DeletePrimaryPropertyInColumns1684075099676 implements MigrationInt
           length: '50',
         }),
       },
-    ]);
+    ])
   }
 }

@@ -1,8 +1,11 @@
-import { BadRequestException, CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
+import { BadRequestException, CanActivate, ExecutionContext, Injectable, UsePipes, ValidationPipe } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
-import { Observable } from 'rxjs'
+import { UserEntity } from 'src/models/user.model'
 import { DataSource } from 'typeorm'
+import { TokenPayload } from './requests/token.payload'
+import { log } from 'console'
 
 interface RequestExtended extends Request {
   cookies: { authToken?: string }
@@ -10,14 +13,18 @@ interface RequestExtended extends Request {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector, private readonly dataSource: DataSource) {}
+  constructor(private readonly reflector: Reflector, private readonly dataSource: DataSource, private readonly JwtService: JwtService) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestExtended>()
 
     if (!request.cookies?.authToken) {
       throw new BadRequestException('Not authorize user.')
     }
+
+    const tokenData = await this.JwtService.verify<TokenPayload>(request.cookies.authToken)
+
+    request.user = await this.dataSource.getRepository(UserEntity).findOneBy({ id: Number(tokenData.userId) })
 
     return true
   }

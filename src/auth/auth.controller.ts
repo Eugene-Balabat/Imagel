@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common'
-import { Response } from 'express'
+import { Body, Controller, Get, InternalServerErrorException, Param, Post, Req, Res, UseGuards } from '@nestjs/common'
+import { Request, Response } from 'express'
 import { AuthGuard } from './auth.guard'
 import { AuthService } from './auth.service'
 import { AuthBody } from './requests/auth.body'
 import { IsUserExistsParams } from './requests/is-user-exist.params'
+import { UserEntity } from 'src/models/user.model'
+import { User } from 'src/decorators/user.decorator'
 
 @Controller('/auth')
 export class AuthController {
@@ -14,16 +16,17 @@ export class AuthController {
     const token = await this.authService.generateNewUserToken(body.login, body.password)
 
     if (!token) {
-      // server error
+      throw new InternalServerErrorException()
     }
 
     response.cookie('authToken', token)
   }
 
-  // @Post()
-  // async unAuthorize(@Res({ passthrough: true }) response: Response) {
-  //   // response.cookie('authToken', token)
-  // }
+  @UseGuards(AuthGuard)
+  @Post('/unauth')
+  async unAuthorize(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('authToken')
+  }
 
   @UseGuards(AuthGuard)
   @Get('/is-authorized')

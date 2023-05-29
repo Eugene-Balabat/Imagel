@@ -6,12 +6,12 @@ import { AuthModule } from './auth/auth.module'
 import { ImageModule } from './image/image.module'
 import { ImageEntity } from './models/image.model'
 import { UserEntity } from './models/user.model'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
     AuthModule,
     ImageModule,
-
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -27,6 +27,14 @@ import { UserEntity } from './models/user.model'
         synchronize: false,
         migrationsRun: true,
         cache: { duration: 1 },
+      }),
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('SECRET_KEY'),
+        signOptions: { expiresIn: '2h' },
       }),
     }),
   ],

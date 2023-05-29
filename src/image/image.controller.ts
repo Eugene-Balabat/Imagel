@@ -1,18 +1,31 @@
-import { Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { AuthGuard } from 'src/auth/auth.guard'
 import { ImageService } from './image.service'
-import { UserRequestParams } from './requests/user.param'
+import { User } from 'src/decorators/user.decorator'
+import { UserEntity } from 'src/models/user.model'
+import { PaginationParams } from 'src/auth/requests/pagination.params'
+import { ImageResponse } from './responses/image.response'
 
 @Controller('/image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
   @UseGuards(AuthGuard)
-  @Get('/:userId')
-  async getUserImages(@Param() params: UserRequestParams) {
-    return this.imageService.getAllUserImages(params.userId)
+  @Get()
+  async getUserImages(@User() user: UserEntity) {
+    return this.imageService.getAllUserImages(user.id)
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/all')
+  async getAllImages(@Query() params: PaginationParams) {
+    const imageData = await this.imageService.getAllImages(params)
+
+    return imageData.map((image) => {
+      return new ImageResponse(image)
+    })
   }
 
   @UseGuards(AuthGuard)
@@ -27,7 +40,7 @@ export class ImageController {
       }),
     }),
   )
-  async saveImage(@UploadedFile() file: Express.Multer.File, @Param() params: UserRequestParams) {
-    await this.imageService.saveImageToDB(params.userId, file.filename)
+  async saveImage(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
+    await this.imageService.saveImageToDB(user.id, file.filename)
   }
 }
