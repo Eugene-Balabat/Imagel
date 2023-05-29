@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtModule } from '@nestjs/jwt'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import * as path from 'path'
 import { AuthModule } from './auth/auth.module'
 import { ImageModule } from './image/image.module'
 import { ImageEntity } from './models/image.model'
 import { UserEntity } from './models/user.model'
-import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
@@ -27,6 +27,7 @@ import { JwtModule } from '@nestjs/jwt'
         synchronize: false,
         migrationsRun: true,
         cache: { duration: 1 },
+        parseInt8: true,
       }),
     }),
     JwtModule.registerAsync({

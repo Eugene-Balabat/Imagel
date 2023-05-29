@@ -9,7 +9,7 @@ export class AddNicknameColumnToUserTable1685225183583 implements MigrationInter
         isNullable: false,
         type: 'varchar',
         length: '50',
-        default: "'No Nickname'",
+        default: 'No Nickname',
       }),
     )
   }

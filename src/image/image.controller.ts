@@ -2,10 +2,10 @@ import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors 
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { AuthGuard } from 'src/auth/auth.guard'
-import { ImageService } from './image.service'
+import { PaginationParams } from 'src/auth/requests/pagination.params'
 import { User } from 'src/decorators/user.decorator'
 import { UserEntity } from 'src/models/user.model'
-import { PaginationParams } from 'src/auth/requests/pagination.params'
+import { ImageService } from './image.service'
 import { ImageResponse } from './responses/image.response'
 
 @Controller('/image')
@@ -22,10 +22,7 @@ export class ImageController {
   @Get('/all')
   async getAllImages(@Query() params: PaginationParams) {
     const imageData = await this.imageService.getAllImages(params)
-
-    return imageData.map((image) => {
-      return new ImageResponse(image)
-    })
+    return imageData.map((image) => new ImageResponse(image))
   }
 
   @UseGuards(AuthGuard)

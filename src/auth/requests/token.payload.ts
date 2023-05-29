@@ -1,6 +1,3 @@
-import { IsNumber } from 'class-validator'
-
-export class TokenPayload {
-  @IsNumber()
-  userId: string
+export interface TokenPayload {
+  userId: number
 }
