@@ -48,6 +48,8 @@
 
 ### 29.05.2023
 
+!DONE
+
 - Сделать возможность пользователю загружать аватарки, в процессе загрузки используя sharp <https://www.npmjs.com/package/sharp> уменьшить её в размере до 128 пикселей и находится по адресу в хранилище /storage/{:userId}/avatar.jpg. Все остальные изображения которые грузит ползователь должны размещаться в папке /storage/{:userId}/images/{imageName.extention}.
 
 - Реализовать Throttle на запросы используя <https://docs.nestjs.com/security/rate-limiting> на 100 запросов в минуту.
