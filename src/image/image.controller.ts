@@ -32,56 +32,37 @@ export class ImageController {
   // Можно добавить валидацию на входящие файлы
   @UseGuards(AuthGuard)
   @Post('/image/save')
-  @UseInterceptors(
-    FileInterceptor(`image`, {
-      storage: diskStorage({
-        destination: async (req, file, callback) => {
-          const destination = `./uploads/${req.user.id}/images`
-
-          await fs.ensureDir(destination)
-          callback(null, destination)
-        },
-
-        filename: (req, file, callback) => {
-          callback(null, `${md5(`${new Date()}${file.originalname}`)}${path.extname(file.originalname)}`)
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor(`image`))
   async saveImage(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
-    await this.imageService.saveImageToDB(user.id, file.filename)
+    const destination = `./uploads/${user.id}/images`
+    const fileName = `${md5(`${new Date()}${file.originalname}`)}${path.extname(file.originalname)}`
+
+    await fs.ensureDir(destination)
+    await fs.writeFile(`${destination}/${fileName}`, file.buffer)
+
+    await this.imageService.saveImageToDB(user.id, fileName)
   }
 
   @UseGuards(AuthGuard)
   @Post('/avatar/save')
-  @UseInterceptors(
-    FileInterceptor(`image`, {
-      storage: diskStorage({
-        destination: async (req, file, callback) => {
-          await fs.ensureDir(`./uploads/${req.user.id}/avatar`)
-          callback(null, `./uploads/${req.user.id}/avatar`)
-        },
-
-        filename: (req, file, callback) => {
-          callback(null, file.originalname)
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor(`image`))
   async saveAvatar(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
-    const imageName = 'avatar'
+    const fileName = 'avatar'
+    const destination = `./uploads/${user.id}/avatar`
+
+    await fs.ensureDir(destination)
+
     try {
-      await sharp(file.path)
+      await sharp(file.buffer)
         .resize({
           width: 128,
           height: 128,
         })
-        .toFile(`${file.destination}/${imageName}${path.extname(file.originalname)}`)
+        .toFile(`${destination}/${fileName}${path.extname(file.originalname)}`)
     } catch (error) {
-      //Does not exist a original Image
+      //Error with getting File
     }
 
-    await fs.remove(file.path)
-    await this.imageService.saveImageToDB(user.id, imageName)
+    await this.imageService.saveImageToDB(user.id, fileName)
   }
 }

@@ -7,12 +7,20 @@ import { AuthModule } from './auth/auth.module'
 import { ImageModule } from './image/image.module'
 import { ImageEntity } from './models/image.model'
 import { UserEntity } from './models/user.model'
+import { ThrottlerModule } from '@nestjs/throttler'
 
 @Module({
   imports: [
     AuthModule,
     ImageModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        ttl: 60,
+        limit: configService.get<number>('REQUESTS_LIMIT'),
+      }),
+    }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

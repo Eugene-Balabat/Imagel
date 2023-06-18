@@ -17,6 +17,9 @@ export class UserEntity extends BaseEntity {
   @Column({ primary: false, type: 'varchar', length: 50, name: 'nickname' })
   nickname!: string
 
+  @Column({ primary: false, type: 'varchar', length: 100, name: 'email' })
+  email!: string
+
   @OneToMany(() => ImageEntity, (image) => image.user)
   images!: ImageEntity[]
 }
