@@ -8,6 +8,9 @@ export class RegistrationBody {
   @IsString()
   lastName: string
 
+  @IsString()
+  nickname: string
+
   @IsNumber()
   @Type(() => Number)
   age: number

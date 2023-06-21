@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { AuthGuard } from 'src/auth/auth.guard'
@@ -11,10 +11,11 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as sharp from 'sharp'
 import * as md5 from 'md5'
+import { ConfigService } from '@nestjs/config'
 
 @Controller('/image')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  constructor(private readonly imageService: ImageService, private readonly configService: ConfigService) {}
 
   @UseGuards(AuthGuard)
   @Get()
@@ -47,7 +48,7 @@ export class ImageController {
   @Post('/avatar/save')
   @UseInterceptors(FileInterceptor(`image`))
   async saveAvatar(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
-    const fileName = 'avatar'
+    const fileName = this.configService.get('ACCOUNT_MAIN_PHOTO_NAME')
     const destination = `./uploads/${user.id}/avatar`
 
     await fs.ensureDir(destination)
@@ -60,7 +61,7 @@ export class ImageController {
         })
         .toFile(`${destination}/${fileName}${path.extname(file.originalname)}`)
     } catch (error) {
-      //Error with getting File
+      throw new BadRequestException()
     }
 
     await this.imageService.saveImageToDB(user.id, fileName)
