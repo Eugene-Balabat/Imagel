@@ -4,6 +4,8 @@
 
 /uploads
 
+*.rdb
+
 # Logs
 logs
 *.log
