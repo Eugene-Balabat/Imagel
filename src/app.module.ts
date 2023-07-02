@@ -1,18 +1,17 @@
+import { RedisModule } from '@liaoliaots/nestjs-redis'
+import { MailerModule } from '@nestjs-modules/mailer'
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import * as path from 'path'
 import { AuthModule } from './auth/auth.module'
 import { ImageModule } from './image/image.module'
+import { MailModule } from './mail/mail.module'
 import { ImageEntity } from './models/image.model'
 import { UserEntity } from './models/user.model'
-import { ThrottlerModule } from '@nestjs/throttler'
-import { MailModule } from './mail/mail.module'
-import { MailerModule } from '@nestjs-modules/mailer'
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
-import { CacheModule } from '@nestjs/cache-manager'
-import { redisStore } from 'cache-manager-redis-yet'
 
 @Module({
   imports: [
@@ -62,17 +61,13 @@ import { redisStore } from 'cache-manager-redis-yet'
         },
       },
     }),
-    CacheModule.registerAsync({
+    RedisModule.forRootAsync({
       inject: [ConfigService],
-      isGlobal: true,
       useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          ttl: configService.get('DEFAULT_TTL'),
-          socket: {
-            host: configService.get('HOST'),
-            port: configService.get('PORT'),
-          },
-        }),
+        config: {
+          host: configService.get('HOST'),
+          port: configService.get('PORT'),
+        },
       }),
     }),
   ],

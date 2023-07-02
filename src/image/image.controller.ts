@@ -1,18 +1,19 @@
-import { BadRequestException, Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { diskStorage } from 'multer'
+import crypto from 'crypto'
+import * as fs from 'fs-extra'
+import 'multer'
+import * as path from 'path'
+import * as sharp from 'sharp'
 import { AuthGuard } from 'src/auth/auth.guard'
 import { PaginationParams } from 'src/auth/requests/pagination.params'
 import { User } from 'src/decorators/user.decorator'
 import { UserEntity } from 'src/models/user.model'
+import { DataSource } from 'typeorm'
+import { EnvConfig } from '../app.enum'
 import { ImageService } from './image.service'
 import { ImageResponse } from './responses/image.response'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import * as sharp from 'sharp'
-import * as md5 from 'md5'
-import { ConfigService } from '@nestjs/config'
-import { DataSource } from 'typeorm'
 
 @Controller('/image')
 export class ImageController {
@@ -42,7 +43,7 @@ export class ImageController {
   async saveImage(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
     await this.dataSource.transaction(async (trx) => {
       const destination = `./uploads/${user.id}/images`
-      const fileName = `${md5(`${new Date()}${file.originalname}`)}${path.extname(file.originalname)}`
+      const fileName = `${crypto.createHash('MD5').update(`${new Date()}${file.originalname}`).digest('hex')}${path.extname(file.originalname)}`
 
       await fs.ensureDir(destination)
       await fs.writeFile(`${destination}/${fileName}`, file.buffer)
@@ -56,21 +57,14 @@ export class ImageController {
   @UseInterceptors(FileInterceptor(`image`))
   async saveAvatar(@UploadedFile() file: Express.Multer.File, @User() user: UserEntity) {
     await this.dataSource.transaction(async (trx) => {
-      const fileName = this.configService.get('ACCOUNT_MAIN_PHOTO_NAME')
+      const fileName = this.configService.get(EnvConfig.ACCOUNT_MAIN_PHOTO_NAME)
       const destination = `./uploads/${user.id}/avatar`
 
       await fs.ensureDir(destination)
 
-      try {
-        await sharp(file.buffer)
-          .resize({
-            width: 128,
-            height: 128,
-          })
-          .toFile(`${destination}/${fileName}${path.extname(file.originalname)}`)
-      } catch (error) {
-        throw new BadRequestException()
-      }
+      await sharp(file.buffer)
+        .resize({ width: 128, height: 128 })
+        .toFile(`${destination}/${fileName}${path.extname(file.originalname)}`)
 
       await this.imageService.saveImageToDB(user.id, fileName, trx)
     })

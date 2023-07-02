@@ -11,7 +11,7 @@ export class ImageEntity extends BaseEntity {
   @Column({ primary: false, type: 'varchar', length: 100, name: 'title' })
   title!: string
 
-  @Column({ primary: false, type: 'timestamp', name: 'date', default: () => 'NOW()' })
+  @Column({ primary: false, type: 'timestamp', name: 'date' })
   date: Date
 
   @Column({ primary: false, type: 'int8', name: 'user_id' })

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { isUndefined, omitBy } from 'lodash'
 import { UserEntity } from 'src/models/user.model'
 import { DataSource, EntityManager } from 'typeorm'
 import { RedisUserDataRG } from './interfaces/redis-registartion-user.interface'
@@ -7,6 +8,11 @@ import { RedisUserDataRG } from './interfaces/redis-registartion-user.interface'
 @Injectable()
 export class AuthService {
   constructor(private readonly dataSource: DataSource, private readonly jwtService: JwtService) {}
+
+  public async isUserExist(conditions: Partial<Pick<UserEntity, 'id' | 'email'>>, trx?: EntityManager) {
+    const usersCount = await (trx || this.dataSource).getRepository(UserEntity).count({ where: omitBy(conditions, isUndefined) })
+    return Boolean(usersCount)
+  }
 
   public async isUserExistById(userId: number, trx?: EntityManager) {
     const usersCount = await (trx || this.dataSource).getRepository(UserEntity).count({ where: { id: userId } })

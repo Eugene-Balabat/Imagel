@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { PaginationParams } from 'src/auth/requests/pagination.params'
 import { ImageEntity } from 'src/models/image.model'
 import { DataSource, EntityManager } from 'typeorm'
@@ -8,7 +8,8 @@ export class ImageService {
   constructor(private readonly dataSource: DataSource) {}
 
   async saveImageToDB(userId: number, title: string, trx?: EntityManager) {
-    await (trx || this.dataSource).getRepository(ImageEntity).insert({ title, userId, date: new Date() })
+    const image = this.dataSource.getRepository(ImageEntity).create({ title, userId })
+    await (trx || this.dataSource).getRepository(ImageEntity).insert(image)
   }
 
   async getAllUserImages(userId: number, trx?: EntityManager) {
@@ -16,6 +17,10 @@ export class ImageService {
   }
 
   async getAllImages(params: PaginationParams, trx?: EntityManager) {
-    return (trx || this.dataSource).getRepository(ImageEntity).find({ skip: (params.page - 1) * params.limit, take: params.limit, relations: { user: true } })
+    return (trx || this.dataSource).getRepository(ImageEntity).find({
+      relations: { user: true },
+      skip: (params.page - 1) * params.limit,
+      take: params.limit,
+    })
   }
 }

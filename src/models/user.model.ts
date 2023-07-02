@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { AfterLoad, BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { ImageEntity } from './image.model'
 
 @Injectable()
@@ -19,4 +19,9 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => ImageEntity, (image) => image.user)
   images!: ImageEntity[]
+
+  @AfterLoad()
+  async afterLoad() {
+    this.images = []
+  }
 }

@@ -1,9 +1,9 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { InjectRedis } from '@liaoliaots/nestjs-redis'
+import { BadRequestException, Body, Controller, Get, Param, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ApiOperation } from '@nestjs/swagger'
-import { Cache } from 'cache-manager'
 import { Response } from 'express'
+import { Redis } from 'ioredis'
 import { MailService } from 'src/mail/mail.service'
 import { DataSource } from 'typeorm'
 import { EnvConfig } from '../app.enum'
@@ -24,8 +24,8 @@ export class AuthController {
     private readonly mailingService: MailService,
     private readonly configService: ConfigService,
 
-    @Inject(CACHE_MANAGER)
-    private cacheService: Cache,
+    @InjectRedis()
+    private redis: Redis,
   ) {}
 
   @ApiOperation({ summary: 'Authorization.' })
@@ -57,14 +57,14 @@ export class AuthController {
       const code = Math.floor(Math.random() * (999999 - 100000) + 100000)
       await this.mailingService.sendMail(code, body.email, body.firstName)
 
-      await this.cacheService.set(body.email, { ...body, code }, this.configService.get(EnvConfig.USER_REGISTRATION_REDIS_TTL_MS))
+      await this.redis.set(body.email, JSON.stringify({ ...body, code }), 'EX', this.configService.get(EnvConfig.USER_REGISTRATION_REDIS_TTL_MS))
     })
   }
 
   @Post('/registration/confirm')
   async confirmRegistration(@Body() body: RegistrationConfrimBody) {
     await this.dataSource.transaction(async (trx) => {
-      const storedData = await this.cacheService.get<RedisUserDataRG>(body.key)
+      const storedData: RedisUserDataRG = JSON.parse(await this.redis.get(body.key))
 
       if (storedData.code !== body.code) {
         throw new BadRequestException()
@@ -72,7 +72,7 @@ export class AuthController {
 
       await this.authService.registrateNewUser(storedData, trx)
 
-      await this.cacheService.del(body.key)
+      await this.redis.del(body.key)
     })
   }
 
