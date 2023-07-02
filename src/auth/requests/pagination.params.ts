@@ -4,13 +4,9 @@ import { IsNumber } from 'class-validator'
 export class PaginationParams {
   @IsNumber()
   @Type(() => Number)
-  limit: number
+  limit = 2
 
   @IsNumber()
   @Type(() => Number)
   page: number
-
-  constructor(limit?: number) {
-    this.limit = limit || 2
-  }
 }

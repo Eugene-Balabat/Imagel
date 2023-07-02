@@ -8,15 +8,13 @@ import { RedisUserDataRG } from './interfaces/redis-registartion-user.interface'
 export class AuthService {
   constructor(private readonly dataSource: DataSource, private readonly jwtService: JwtService) {}
 
-  public async isUserExistPerId(userId: number, trx?: EntityManager) {
+  public async isUserExistById(userId: number, trx?: EntityManager) {
     const usersCount = await (trx || this.dataSource).getRepository(UserEntity).count({ where: { id: userId } })
-
     return Boolean(usersCount)
   }
 
   public async isUserExistPerEmail(email: string, trx?: EntityManager) {
     const usersCount = await (trx || this.dataSource).getRepository(UserEntity).count({ where: { email } })
-
     return Boolean(usersCount)
   }
 
@@ -35,6 +33,7 @@ export class AuthService {
   }
 
   public async registrateNewUser(userData: RedisUserDataRG, trx?: EntityManager) {
-    await (trx || this.dataSource).getRepository(UserEntity).insert({ password: userData.password, email: userData.email })
+    const user = this.dataSource.getRepository(UserEntity).create({ password: userData.password, email: userData.email })
+    await (trx || this.dataSource).getRepository(UserEntity).save(user)
   }
 }

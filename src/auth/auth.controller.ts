@@ -1,28 +1,34 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, Inject, Param, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { ApiOperation } from '@nestjs/swagger'
+import { Cache } from 'cache-manager'
 import { Response } from 'express'
+import { MailService } from 'src/mail/mail.service'
+import { DataSource } from 'typeorm'
+import { EnvConfig } from '../app.enum'
+import { AuthCookies } from './auth.enum'
 import { AuthGuard } from './auth.guard'
 import { AuthService } from './auth.service'
+import { RedisUserDataRG } from './interfaces/redis-registartion-user.interface'
 import { AuthBody } from './requests/auth.body'
 import { IsUserExistsParams } from './requests/is-user-exist.params'
+import { RegistrationConfrimBody } from './requests/registration-confirm.body'
 import { RegistrationBody } from './requests/registration.body'
-import { MailService } from 'src/mail/mail.service'
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Cache } from 'cache-manager'
-import { RegistrationConfrimBody } from './requests/registration.confirm.body'
-import { RedisUserDataRG } from './interfaces/redis-registartion-user.interface'
-import { ConfigService } from '@nestjs/config'
-import { DataSource } from 'typeorm'
 
 @Controller('/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly dataSource: DataSource,
-    readonly mailingService: MailService,
-    @Inject(CACHE_MANAGER) private cacheService: Cache,
+    private readonly mailingService: MailService,
     private readonly configService: ConfigService,
+
+    @Inject(CACHE_MANAGER)
+    private cacheService: Cache,
   ) {}
 
+  @ApiOperation({ summary: 'Authorization.' })
   @Post()
   async authorize(@Body() body: AuthBody, @Res({ passthrough: true }) response: Response) {
     await this.dataSource.transaction(async (trx) => {
@@ -34,7 +40,7 @@ export class AuthController {
 
       const token = await this.authService.generateNewToken({ userId: user.id })
 
-      response.cookie('authToken', token)
+      response.cookie(AuthCookies.AUTH_TOKEN, token)
     })
   }
 
@@ -44,14 +50,14 @@ export class AuthController {
       const userExistPerEmail = await this.authService.isUserExistPerEmail(body.email, trx)
 
       if (userExistPerEmail) {
-        throw new ConflictException()
+        throw new BadRequestException(`Is user with this email already exist.`)
       }
 
       // const code = 123456
       const code = Math.floor(Math.random() * (999999 - 100000) + 100000)
       await this.mailingService.sendMail(code, body.email, body.firstName)
 
-      await this.cacheService.set(body.email, { ...body, code }, this.configService.get('USER_REGISTRATION_REDIS_TTL'))
+      await this.cacheService.set(body.email, { ...body, code }, this.configService.get(EnvConfig.USER_REGISTRATION_REDIS_TTL_MS))
     })
   }
 
@@ -73,7 +79,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('/unauth')
   async unAuthorize(@Res() response: Response) {
-    response.clearCookie('authToken')
+    response.clearCookie(AuthCookies.AUTH_TOKEN)
   }
 
   @UseGuards(AuthGuard)
@@ -86,7 +92,7 @@ export class AuthController {
   @Get('/is-user-exist/:userId')
   async isUserExist(@Param() params: IsUserExistsParams) {
     return await this.dataSource.transaction(async (trx) => {
-      return this.authService.isUserExistPerId(params.userId, trx)
+      return this.authService.isUserExistById(params.userId, trx)
     })
   }
 }

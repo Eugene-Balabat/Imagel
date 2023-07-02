@@ -4,10 +4,11 @@ import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import { UserEntity } from 'src/models/user.model'
 import { DataSource } from 'typeorm'
+import { AuthCookies } from './auth.enum'
 import { TokenPayload } from './requests/token.payload'
 
 interface RequestExtended extends Request {
-  cookies: { authToken?: string }
+  cookies: { [AuthCookies.AUTH_TOKEN]?: string }
 }
 
 @Injectable()
@@ -17,11 +18,11 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestExtended>()
 
-    if (!request.cookies?.authToken) {
+    if (!request.cookies[AuthCookies.AUTH_TOKEN]) {
       throw new BadRequestException('Not authorize user.')
     }
 
-    const tokenData = await this.JwtService.verify<TokenPayload>(request.cookies.authToken)
+    const tokenData = await this.JwtService.verify<TokenPayload>(request.cookies[AuthCookies.AUTH_TOKEN])
 
     request.user = await this.dataSource.getRepository(UserEntity).findOneBy({ id: tokenData.userId })
 
