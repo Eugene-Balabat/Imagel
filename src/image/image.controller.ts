@@ -7,18 +7,20 @@ import 'multer'
 import * as path from 'path'
 import * as sharp from 'sharp'
 import { AuthGuard } from 'src/auth/auth.guard'
-import { PaginationParams } from 'src/auth/requests/pagination.params'
+import { PaginationParams } from 'src/image/requests/pagination.params'
 import { User } from 'src/decorators/user.decorator'
 import { UserEntity } from 'src/models/user.model'
 import { DataSource } from 'typeorm'
 import { EnvConfig } from '../app.enum'
 import { ImageService } from './image.service'
 import { ImageResponse } from './responses/image.response'
+import { ApiOperation } from '@nestjs/swagger'
 
 @Controller('/image')
 export class ImageController {
   constructor(private readonly imageService: ImageService, private readonly configService: ConfigService, private readonly dataSource: DataSource) {}
 
+  @ApiOperation({ summary: 'Get all user images.' })
   @UseGuards(AuthGuard)
   @Get()
   async getUserImages(@User() user: UserEntity) {
@@ -27,6 +29,7 @@ export class ImageController {
     })
   }
 
+  @ApiOperation({ summary: 'Get all images.' })
   @UseGuards(AuthGuard)
   @Get('/all')
   async getAllImages(@Query() params: PaginationParams) {
@@ -37,6 +40,7 @@ export class ImageController {
   }
 
   // Можно добавить валидацию на входящие файлы
+  @ApiOperation({ summary: 'Save user image on the server.' })
   @UseGuards(AuthGuard)
   @Post('/image/save')
   @UseInterceptors(FileInterceptor(`image`))
@@ -52,6 +56,7 @@ export class ImageController {
     })
   }
 
+  @ApiOperation({ summary: 'Save user avatar on the server.' })
   @UseGuards(AuthGuard)
   @Post('/avatar/save')
   @UseInterceptors(FileInterceptor(`image`))
