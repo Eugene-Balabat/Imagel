@@ -30,8 +30,8 @@ import { UserEntity } from './models/user.model'
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
+        host: process.env.PG_HOST || configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT_DOCKER'),
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
@@ -65,7 +65,7 @@ import { UserEntity } from './models/user.model'
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         config: {
-          host: configService.get('HOST'),
+          host: process.env.REDIS_HOST || configService.get('HOST'),
           port: configService.get('PORT'),
         },
       }),
