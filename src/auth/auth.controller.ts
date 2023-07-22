@@ -44,6 +44,7 @@ export class AuthController {
     })
   }
 
+  @ApiOperation({ summary: 'Add userdata in Redis storage. Send E-mail with confirmation code.' })
   @Post('/registration')
   async registration(@Body() body: RegistrationBody) {
     await this.dataSource.transaction(async (trx) => {
@@ -61,6 +62,7 @@ export class AuthController {
     })
   }
 
+  @ApiOperation({ summary: 'Add new user in DB.' })
   @Post('/registration/confirm')
   async confirmRegistration(@Body() body: RegistrationConfrimBody) {
     await this.dataSource.transaction(async (trx) => {
@@ -76,18 +78,21 @@ export class AuthController {
     })
   }
 
+  @ApiOperation({ summary: 'Unauthorization.' })
   @UseGuards(AuthGuard)
   @Post('/unauth')
   async unAuthorize(@Res() response: Response) {
     response.clearCookie(AuthCookies.AUTH_TOKEN)
   }
 
+  @ApiOperation({ summary: 'Check Is user authorized.' })
   @UseGuards(AuthGuard)
   @Get('/is-authorized')
   async isAuthorized() {
     return true
   }
 
+  @ApiOperation({ summary: 'Check Is user exist.' })
   @UseGuards(AuthGuard)
   @Get('/is-user-exist/:userId')
   async isUserExist(@Param() params: IsUserExistsParams) {

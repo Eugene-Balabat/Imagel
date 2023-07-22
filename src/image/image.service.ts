@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PaginationParams } from 'src/auth/requests/pagination.params'
+import { PaginationParams } from 'src/image/requests/pagination.params'
 import { ImageEntity } from 'src/models/image.model'
 import { DataSource, EntityManager } from 'typeorm'
 

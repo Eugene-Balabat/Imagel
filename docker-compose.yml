@@ -1,0 +1,36 @@
+version: '2.1'
+services:
+  postgres_imagel:
+    image: postgres:13-bullseye
+    restart: always
+    environment:
+      POSTGRES_DB: 'imagel'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'user'
+      #POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - '5438:5432'
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  redis_imagel:
+    image: redis:6.0.20-alpine3.18
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server
+
+  backend_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres_imagel
+      - redis_imagel
+    image: 'yevhenbalabat/imagel:v1'
+    container_name: yevhenbalabat_imagel_v1
+    environment:
+      PG_HOST: postgres_imagel
+      REDIS_HOST: redis_imagel
+    ports:
+      - '3000:3000'

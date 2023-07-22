@@ -17,7 +17,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
 
   app.use(cookieParser())
-  app.use(compression({ level: zlib.constants.Z_BEST_COMPRESSION, memLevel: zlib.constants.Z_MAX_MEMLEVEL }))
+  //app.use(compression({ level: zlib.constants.Z_BEST_COMPRESSION, memLevel: zlib.constants.Z_MAX_MEMLEVEL }))
 
   await app.listen(3000)
 }

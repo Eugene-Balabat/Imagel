@@ -5,7 +5,7 @@ import { Request } from 'express'
 import { UserEntity } from 'src/models/user.model'
 import { DataSource } from 'typeorm'
 import { AuthCookies } from './auth.enum'
-import { TokenPayload } from './requests/token.payload'
+import { TokenPayload } from './interfaces/token.payload'
 
 interface RequestExtended extends Request {
   cookies: { [AuthCookies.AUTH_TOKEN]?: string }
